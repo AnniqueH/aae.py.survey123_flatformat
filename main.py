@@ -6,15 +6,20 @@
 #
 # Created:     13/05/2022
 # Copyright:   (c) ak34 2022
-# Licence:     <your licence>
-# Last Update: 06/02/2024
+# Licence:     007
 
 # ~~~~ TO DO ~~~~~~~~~~~~
 #   Add timestamp
-#   Add name of input file
 #   Error Check output file not open
 #   Navigate to input file
 #       https://stackoverflow.com/questions/9319317/quick-and-easy-file-dialog-in-python
+#
+#
+# ~~ PACKAGES TO INSTALL ON FIRST RUN ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+# openpyxl
+#
+#
+#
 # -------------------------------------------------------------------------------
 #
 
@@ -23,13 +28,6 @@
 # ==========================================================================================================================================#
 ##
 ##export_default = False
-
-####input_type = 'Fish_Survey_v1' # Original Fish Survey format
-####input_type = 'Fish_Survey_v2' # VEFMAP
-####input_type = 'Fish_Survey_v2_1' # Hack, Dawson
-####input_type = 'Fish_Survey_v2_2' # Lieschke
-##input_type = 'Fish_Survey_v2_3' # Harris
-####input_type = ''
 
 #remove the bracketed common name from the output
 remove_common_name = True
@@ -132,104 +130,7 @@ else:
     tally_results = []
 
     # SELECT OUTPUT FORMATTING DEPENDING ON 1st SHEET NAME
-
-    if sheetNames[0].find('VEFMAP') >= 0 or sheetNames[0].find('Zeb') >= 0 or sheetNames[0].find('DEV_3_19') >= 0:
-        input_type = 'Fish_Survey_v2'
-
-    elif sheetNames[0].find('Hack') >= 0 or sheetNames[0].find('Dawson') >= 0 or sheetNames[0].find('Murray_Snags') >= 0:
-        input_type = 'Fish_Survey_v2_1'
-
-    elif sheetNames[0].find('Lieschke') >= 0:
-        input_type = 'Fish_Survey_v2_2'
-
-    elif sheetNames[0].find('Harris') >= 0:
-        input_type = 'Fish_Survey_v2_3'
-
-    elif sheetNames[0].find('Crowther') >= 0:
-        input_type = 'Fish_Survey_v2_4'
-    else:
-        input_type = ''
-
-##    input_type = 'Fish_Survey_v1' # Original Fish Survey format
-    input_type_msg = 'default' if input_type == '' else input_type
-    print(func.colour_terminal_output('*** OUTPUT FORMAT: {0}'.format(input_type_msg), 'green'))
-
-    # The following is to order how each page is presented in the results.
-
-    # The data column will not be output if the index is == -1.
-    # The data column will move to the corresponding index value, e.g. if 'site_code' is at index 1,
-    # then [-1, 0, -1, -1, ...] will only output 'site_code' and place it at the start.
-    # A 'j' will join that column and the following column, and place it in the position of the value after the 'j'.
-    # A list of [0, 1, 2, 3, ...] will not change any order.
-    # This will also not take into account 'ObjectID', i.e. 'GlobalID' is the first element.
-    if input_type == 'Fish_Survey_v1':
-        survey_template = [-1, 1, 4, 5, 'j', 6, 7, 8, 9, 10, 11, 12, 0, 13, -1, 14, 15, 16, 17, 18, 19, 20, 21, -1, -1, -1,
-                           -1, -1, 2, 3]
-        location_template = [-1, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-                             3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -1, -1, -1, -1]
-        obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
-        sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
-
-    elif input_type == 'Fish_Survey_v2': # VEFMAP, Zeb
-
-        survey_template = [-1, 1, 4, 5, 'j', 6, 7, 8, 9, 10, 11, 12, 0, 13, -1, 14, 15, 16, 17, 18, 19, 20, 21, -1, -1,
-                           -1, -1, 2, 3]
-        location_template = [-1, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-                             3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, -1, -1, -1, -1, -1]
-        obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
-        sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
-
-    elif input_type == 'Fish_Survey_v2_1': # Hack, Dawson, Murray_Snags
-
-        survey_template = [-1, 1, 4, 5, 'j', 6, 7, 8, 9, 10, 11, 12, 0, 13, -1, 14, 15, 16, 17, 18, 19, 20, 21, -1, -1,
-                           -1, -1, -1, 2, 3]
-        location_template = [-1, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-                             3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, -1, -1, -1, -1, -1, -1, 9, 10, 11, 12, 13]
-        obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
-        sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
-
-    elif input_type == 'Fish_Survey_v2_2': # Lieschke
-
-        survey_template = [-1, 1, 4, 5, 'j', 6, 7, 8, 9, 10, 11, 12, 0, 13, -1, 14, 15, 16, 17, 18, 19, 20, 21, -1, -1,
-                           -1, -1, 2, 3]
-        location_template = [-1, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-                             3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, -1, -1, -1, -1, -1, 13]
-        obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
-        sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
-
-    elif input_type == 'Fish_Survey_v2_3': # Harris
-
-        survey_template = [-1, 1, 4, 5, 'j', 6, 7, 8, 9, 10, 11, 12, 0, 13, -1, 14, 15, 16, 17, 18, 19, 20, 21, -1, -1,
-                           -1, -1, -1, 2, 3]
-        location_template = [-1, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-                             3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [-1,0,1,2,3,4,5,6,7,8,-1,-1,-1,-1,-1,9,10,11,12,13]
-        obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
-        sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
-
-    elif input_type == 'Fish_Survey_v2_4': # Crowther
-
-        survey_template = [-1, 1, 4, 5, 'j', 6, 7, 8, 9, 10, 11, 12, 0, 13, -1, 14, 15, 16, 17, 18, 19, 20, 21, -1, -1,
-                           -1, -1, 2, 3]
-        location_template = [-1, -1, -1, -1, -1, -1, -1, 0, 1, 2,
-                             3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,-1,-1,-1,-1,-1,14]
-        obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
-        sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
-
-    else:
-
-        survey_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-                           27, 28, 29]
-        location_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                             10]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-        obs_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-        sample_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    survey_template, location_template, shot_template, obs_template, sample_template, input_type = func.define_templates(sheetNames)
 
     ## ----------------------------------------------------------------------------------------------------------------------
     ## ----------------------------------------------------------------------------------------------------------------------
@@ -513,7 +414,7 @@ else:
             sample_comparison = 0
 
             for dummy in sample_checklist:
-                if sample_list_current[sample_list_header.index(dummy)] not in [0, None, 'no']:
+                if sample_list_current[sample_list_header.index(dummy)] not in [0, None, 'no'] and species.lower() != 'no fish':
                     skip_samp = FALSE
 
             if skip_samp == FALSE:
@@ -527,13 +428,15 @@ else:
                 if section_number == 0:
                     rand_pick = func.get_random_shot(site_id, species, raw_data, obs_list_header, shot_list_header)
                 else:
-                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('ParentGlobalID')] == site_id and x.shots[shot_list_header.index('section_number')] == section_number
-                        and x.observations[obs_list_header.index('species_obs')] != 'No Fish',  raw_data))
+##                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('ParentGlobalID')] == site_id and x.shots[shot_list_header.index('section_number')] == section_number
+##                        and x.observations[obs_list_header.index('species_obs')] != 'No Fish',  raw_data))
+                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('ParentGlobalID')] == site_id and x.shots[shot_list_header.index('section_number')] == section_number,  raw_data))
 
                     if len(shotlist) > 0:
                         rand_pick = shotlist[0]
                     else:
                         rand_pick = False
+##                        print(func.colour_terminal_output('*** ERROR: Sample not added to designated shot number. Possible shot recorded as No Fish. Sample: {0}'.format(sample_list_current[sample_list_header.index('GlobalID')]), 'red'))
 
                 # If a shot is found:
                 if rand_pick != False:
@@ -621,9 +524,7 @@ else:
                                                              creator,
                                                              ID_Indices))
 
-                            tally_results.append(
-                                [site_id, section_num, species, collected, observed, collected, shotlist[0].shots[shot_list_header.index('GlobalID')],
-                                 None, creator])
+                            tally_results.append([site_id, section_num, species, collected, observed, collected, shotlist[0].shots[shot_list_header.index('GlobalID')], None, creator])
 
                             #A No Fish would have been made if no fish recorded in shot (even though in samples). Need to remove this No Fish
                             func.remove_unrequired_no_fish(raw_data, sample_list_current[sample_list_header.index('ParentGlobalID')], section_num,
