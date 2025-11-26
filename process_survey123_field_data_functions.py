@@ -189,7 +189,7 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
     skip_next = 0
 
     # Filter completed data for shots with collected species at correct site and collected > 0:
-    rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('ParentGlobalID')] == rs_site_id and x.observations[
+    rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('parentrowid')] == rs_site_id and x.observations[
         obs_header.index('species_obs')] == rs_species and x.observations[obs_header.index('section_collected')] > 0,
                                output))
     shotlist = []
@@ -211,7 +211,7 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
     # If matches found with only site and species:
     if skip_next == 0:
         rs_sub_shots = list(filter(
-            lambda x: x.shots[shot_header.index('ParentGlobalID')] == rs_site_id and x.observations[
+            lambda x: x.shots[shot_header.index('parentrowid')] == rs_site_id and x.observations[
                 obs_header.index('species_obs')] == rs_species, output))
 
         if len(rs_sub_shots) > 0:
@@ -225,7 +225,7 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
 
     # If only site match is found (excluding 'no fish' shots):
     if skip_next == 0:
-        rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('ParentGlobalID')] == rs_site_id and x.observations[obs_header.index('species_obs')] != 'No Fish', output))
+        rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('parentrowid')] == rs_site_id and x.observations[obs_header.index('species_obs')] != 'No Fish', output))
 
         if len(rs_sub_shots) > 0:
             skip_next = 1
@@ -237,7 +237,7 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
 
     # If only site match is found XX(but only one shot)XX:
     if skip_next == 0:
-        rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('ParentGlobalID')] == rs_site_id, output))
+        rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('parentrowid')] == rs_site_id, output))
 
         if len(rs_sub_shots) > 0:
 ##            skip_next = 1
@@ -264,7 +264,7 @@ def adjust_species_count(current, raw_data, PGID, section_num, species, svy_head
 
     for completed in raw_data:
         # Check that site, section and species match:
-        if PGID == completed.surveys[svy_header.index('GlobalID')]:
+        if PGID == completed.surveys[svy_header.index('uniquerowid')]:
             if section_num == completed.shots[shot_header.index('section_number')] or section_num == completed.samples[
                 sample_header.index('section_number_samp')]:
                 if species == completed.observations[obs_header.index('species_obs')]:
@@ -297,7 +297,7 @@ def remove_unrequired_no_fish(raw_data, PGID, section_num, svy_header, obs_heade
                          shot_header, tally_results, tally_header):
     for completed in raw_data:
         # Check that site, section and species match:
-        if PGID == completed.surveys[svy_header.index('GlobalID')]:
+        if PGID == completed.surveys[svy_header.index('uniquerowid')]:
             if section_num == completed.shots[shot_header.index('section_number')] or section_num == completed.samples[
                 sample_header.index('section_number_samp')]:
                 if 'No Fish' == completed.observations[obs_header.index('species_obs')]:
@@ -344,11 +344,11 @@ def append_holder_sample_row(shot_current, loc_current, survey_current, species,
     sample_current = [None] * len(sample_header)
     sample_current[sample_header.index('species_samp')] = species
 
-    ID_Indices = [svy_header.index('GlobalID'),
-                  loc_header.index('GlobalID'),
-                  shot_header.index('GlobalID'),
-                  obs_header.index('GlobalID'),
-                  sample_header.index('GlobalID'), ]
+    ID_Indices = [svy_header.index('uniquerowid'),
+                  loc_header.index('globalid'),
+                  shot_header.index('uniquerowid'),
+                  obs_header.index('globalid'),
+                  sample_header.index('globalid'), ]
     raw_data.append(cls.resultObject(survey_current,
                                      loc_current,
                                      shot_current,
@@ -361,15 +361,15 @@ def append_holder_sample_row(shot_current, loc_current, survey_current, species,
 def check_sample_in_raw_data(raw_data, sample_ID, sample_header):
 
     for completed in raw_data:
-        if sample_ID == completed.samples[sample_header.index('GlobalID')]:
+        if sample_ID == completed.samples[sample_header.index('globalid')]:
             return True
 
     return False
 
 def add_samples_to_output_and_tally(samples_list, samples_header, section_number, shot_current, loc_current, survey_current, rawdata, survey_header, loc_header, shot_header, obs_header, tally_results):
 
-    site_id = survey_current[survey_header.index('GlobalID')]
-    shot_id = shot_current[shot_header.index('GlobalID')]
+    site_id = survey_current[survey_header.index('uniquerowid')]
+    shot_id = shot_current[shot_header.index('uniquerowid')]
 
     samples_list = sorted(samples_list, key=lambda x: (samples_header.index('species_samp'), samples_header.index('species_samp_custom')))
 
