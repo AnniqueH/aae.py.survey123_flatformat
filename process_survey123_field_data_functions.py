@@ -85,6 +85,9 @@ def define_templates(sheetNames):
     elif sheetNames[0].find('ELH_IVT') >= 0:
         ##    input_type = 'Fish_Survey_v1' # Original Fish Survey format
         input_type = 'Fish_Survey_v2_5'
+    elif sheetNames[0].find('Fish_Survey') >= 0:
+
+        input_type = 'Fish_Survey_v2_6'
     else:
         input_type = ''
 
@@ -168,14 +171,20 @@ def define_templates(sheetNames):
         shot_template = [-1,0,-1,3,15,16,17,18,19,20,21,22,23,24,25,7,12,5,6,8,9,10,11,13,14,-1,-1,-1,-1,-1,4,1,2]
         obs_template = [-1, -1, -1, 0, 1, 2, -1, -1, -1, -1, -1, -1]
         sample_template = [-1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, -1, 8, 9, 10, -1, -1, -1, -1, -1]
+
+    elif input_type == 'Fish_Survey_v2_6': # Fish Survey (new surveys)
+
+        survey_template = [-1,-1,1,4,5,'j',6,7,8,9,10,11,12,0,13,-1,14,15,16,17,18,19,20,21,-1,-1,-1,-1,2,3]
+        location_template = [-1,-1,-1,-1,-1,0,1,2,3]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
+        shot_template = [-1,-1,0,1,2,3,4,5,6,7,8,9,10,11,12,13,-1,-1,-1,-1,-1]
+        obs_template = [-1,-1,-1,0,1,2,-1,-1,-1,-1,-1,-1]
+        sample_template = [-1,-1,-1,0,1,2,3,4,5,6,7,-1,8,9,10,-1,-1,-1,-1,-1]
     else:
 
-        survey_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26,
-                           27, 28, 29]
-        location_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9,
-                             10]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
-        shot_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
-        obs_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        survey_template = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30]
+        location_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]  # Keep in mind [... x, y] will become ... x_start, y_start, x_end, y_end]
+        shot_template = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21]
+        obs_template = [0,1,2,3,4,5,6,7,8,9,10,11,12]
         sample_template = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
 
 
@@ -190,7 +199,7 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
 
     # Filter completed data for shots with collected species at correct site and collected > 0:
     rs_sub_shots = list(filter(lambda x: x.shots[shot_header.index('parentrowid')] == rs_site_id and x.observations[
-        obs_header.index('species_obs')] == rs_species and x.observations[obs_header.index('section_collected')] > 0,
+        obs_header.index('species_obs')] == rs_species and x.observations[obs_header.index('shot_collected')] > 0,
                                output))
     shotlist = []
 
@@ -204,9 +213,9 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
         prev_section_number = 0
 
         for rs_i in rs_sub_shots:
-            if prev_section_number != rs_i.shots[shot_header.index('section_number')]:
+            if prev_section_number != rs_i.shots[shot_header.index('shot_number')]:
                 shotlist.append(rs_i)
-                prev_section_number = rs_i.shots[shot_header.index('section_number')]
+                prev_section_number = rs_i.shots[shot_header.index('shot_number')]
 
     # If matches found with only site and species:
     if skip_next == 0:
@@ -219,9 +228,9 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
             prev_section_number = 0
 
             for rs_i in rs_sub_shots:
-                if prev_section_number != rs_i.shots[shot_header.index('section_number')]:
+                if prev_section_number != rs_i.shots[shot_header.index('shot_number')]:
                     shotlist.append(rs_i)
-                    prev_section_number = rs_i.shots[shot_header.index('section_number')]
+                    prev_section_number = rs_i.shots[shot_header.index('shot_number')]
 
     # If only site match is found (excluding 'no fish' shots):
     if skip_next == 0:
@@ -231,9 +240,9 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
             skip_next = 1
             prev_section_number = 0
             for rs_i in rs_sub_shots:
-                if prev_section_number != rs_i.shots[shot_header.index('section_number')]:
+                if prev_section_number != rs_i.shots[shot_header.index('shot_number')]:
                     shotlist.append(rs_i)
-                    prev_section_number = rs_i.shots[shot_header.index('section_number')]
+                    prev_section_number = rs_i.shots[shot_header.index('shot_number')]
 
     # If only site match is found XX(but only one shot)XX:
     if skip_next == 0:
@@ -243,9 +252,9 @@ def get_random_shot(rs_site_id, rs_species, output, obs_header, shot_header):
 ##            skip_next = 1
             prev_section_number = 0
             for rs_i in rs_sub_shots:
-                if prev_section_number != rs_i.shots[shot_header.index('section_number')]:
+                if prev_section_number != rs_i.shots[shot_header.index('shot_number')]:
                     shotlist.append(rs_i)
-                    prev_section_number = rs_i.shots[shot_header.index('section_number')]
+                    prev_section_number = rs_i.shots[shot_header.index('shot_number')]
             print(colour_terminal_output('*** Caution: Any shot in site used for {0} : SiteID {1}\n***          Other valid shots' \
                 ' for site may not be used if marked automatically for No Fish'.format(rs_species, rs_site_id), 'red'))
 
@@ -265,12 +274,12 @@ def adjust_species_count(current, raw_data, PGID, section_num, species, svy_head
     for completed in raw_data:
         # Check that site, section and species match:
         if PGID == completed.surveys[svy_header.index('uniquerowid')]:
-            if section_num == completed.shots[shot_header.index('section_number')] or section_num == completed.samples[
-                sample_header.index('section_number_samp')]:
+            if section_num == completed.shots[shot_header.index('shot_number')] or section_num == completed.samples[
+                sample_header.index('shot_no_sample')]:
                 if species == completed.observations[obs_header.index('species_obs')]:
                     # Adjust accordingly
                     #reduced the obs section collected by sample collected value
-                    completed.observations[obs_header.index('section_collected')] -= collected_new
+                    completed.observations[obs_header.index('shot_collected')] -= collected_new
                     break
 
         # Adjust Collected_Tally accordingly:
@@ -279,7 +288,7 @@ def adjust_species_count(current, raw_data, PGID, section_num, species, svy_head
         for tally in tally_results:
 
             if tally[tally_header.index('Site_ID')] == PGID:
-                if tally[tally_header.index('Section_Number')] == section_num:
+                if tally[tally_header.index('shot_number')] == section_num:
                     if tally[tally_header.index('Species')] == species:
 
                         # Alter collected_tally:
@@ -298,15 +307,15 @@ def remove_unrequired_no_fish(raw_data, PGID, section_num, svy_header, obs_heade
     for completed in raw_data:
         # Check that site, section and species match:
         if PGID == completed.surveys[svy_header.index('uniquerowid')]:
-            if section_num == completed.shots[shot_header.index('section_number')] or section_num == completed.samples[
-                sample_header.index('section_number_samp')]:
+            if section_num == completed.shots[shot_header.index('shot_number')] or section_num == completed.samples[
+                sample_header.index('shot_no_sample')]:
                 if 'No Fish' == completed.observations[obs_header.index('species_obs')]:
                     # Adjust accordingly
                     raw_data.remove(completed)
 
                     for item in tally_results:
                         if PGID == item[tally_header.index('Site_ID')]:
-                            if section_num == item[tally_header.index('Section_Number')]:
+                            if section_num == item[tally_header.index('shot_number')]:
                                 if 'No Fish' == item[tally_header.index('Species')]:
                                     tally_results.remove(item)
                                     print('Notice: REMOVED UNREQUIRED NO FISH for site: {0} - shot: {1}'.format(PGID, section_num))
@@ -316,29 +325,29 @@ def remove_unrequired_no_fish(raw_data, PGID, section_num, svy_header, obs_heade
 
 def populate_extra_collected(raw_data, raw_header):
   for rw in raw_data:
-    if rw.collation[raw_header.index('section_collected')] > 0 and rw.collation[raw_header.index('collected')] is None:
-        rw.collation[raw_header.index('collected')] = rw.collation[raw_header.index('section_collected')]
+    if rw.collation[raw_header.index('shot_collected')] > 0 and rw.collation[raw_header.index('collected')] is None:
+        rw.collation[raw_header.index('collected')] = rw.collation[raw_header.index('shot_collected')]
         # print('ID: {0} - s_coll: {1}, coll: {2}'.format(rw.collation[raw_header.index('Obs_GlobalID')], rw.collation[raw_header.index('section_collected')], rw.collation[raw_header.index('collected')]))
 
   return
 
 def correct_net_gear_type(raw_data, raw_header):
   for rw in raw_data:
-    if rw.collation[raw_header.index('gear_type')].lower() in ['net', 'unknown']:
+    if rw.collation[raw_header.index('boat_no')].lower() in ['net', 'unknown']:
         if rw.collation[raw_header.index('net')].lower() != 'ef':
             print('## Notice: Gear type converted to Net type ###')
-            rw.collation[raw_header.index('gear_type')] = rw.collation[raw_header.index('net')]
+            rw.collation[raw_header.index('boat_no')] = rw.collation[raw_header.index('net')]
         else:
             print(colour_terminal_output('*** ERROR Incorrect net type selected for shot id: {0}'.format(rw.collation[raw_header.index('Shot_GlobalID')]), 'red'))
     else:
         if rw.collation[raw_header.index('net')].lower() != 'ef':
             print('## Notice: Gear type converted to Net type ###')
-            rw.collation[raw_header.index('gear_type')] = rw.collation[raw_header.index('net')]
+            rw.collation[raw_header.index('boat_no')] = rw.collation[raw_header.index('net')]
   return
 
 def append_holder_sample_row(shot_current, loc_current, survey_current, species, raw_data, svy_header, loc_header, shot_header, obs_header, sample_header):
     obs_current = [None] * len(obs_header)
-    obs_current[obs_header.index('section_collected')] = -1
+    obs_current[obs_header.index('shot_collected')] = -1
     obs_current[obs_header.index('observed')] = 0
 
     sample_current = [None] * len(sample_header)
@@ -618,7 +627,7 @@ def write_excel_row(wsheet, rowcount, data_row, shot_num, wer_species, wer_fl, w
     wer_species = re.sub(r'\(.*?\) *', '', wer_species)
     wer_species = wer_species.strip()
 
-    wer_gear_type = gear_types[data_row.gear_type]
+    wer_gear_type = gear_types[data_row.boat_no]
 
     ##    wer_gear_type = data_row.gear_type #gear_types[data_row['k_gear_type']] if data_row['k_gear_type'] == data_row.gear_type else data_row.gear_type
 

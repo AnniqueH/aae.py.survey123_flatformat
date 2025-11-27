@@ -33,8 +33,8 @@
 remove_common_name = True
 
 # Names of columns to sort for raw and tally sheets:
-raw_sorters = ['survey_date', 'Site_GlobalID', 'section_number', 'species', 'section_collected'] #'observed'
-tally_sorters = ['Site_ID', 'Section_Number', 'Species']
+raw_sorters = ['sdate', 'Site_uniquerowid', 'shot_number', 'species', 'shot_collected'] #'observed'
+tally_sorters = ['Site_ID', 'shot_number', 'Species']
 
 # ==========================================================================================================================================#
 # ========================================================End Preference Changes:===========================================================#
@@ -144,15 +144,15 @@ else:
         site_id = survey_list_current[survey_list_header.index('uniquerowid')]
 
         # Change gear_type name and set section_condition to (UN)FISHABLE
-        survey_list_current[survey_list_header.index('gear_type')] = func.gear_types[
-            survey_list_current[survey_list_header.index('gear_type')]]
-        if survey_list_current[survey_list_header.index('section_condition')] is None or survey_list_current[survey_list_header.index('section_condition')].lower() == 'yes':
-            survey_list_current[survey_list_header.index('section_condition')] = 'FISHABLE'
+        survey_list_current[survey_list_header.index('boat_no')] = func.gear_types[
+            survey_list_current[survey_list_header.index('boat_no')]]
+        if survey_list_current[survey_list_header.index('fishable')] is None or survey_list_current[survey_list_header.index('fishable')].lower() == 'yes':
+            survey_list_current[survey_list_header.index('fishable')] = 'FISHABLE'
         else:
-            survey_list_current[survey_list_header.index('section_condition')] = 'UNFISHABLE'
+            survey_list_current[survey_list_header.index('fishable')] = 'UNFISHABLE'
             print(func.colour_terminal_output('*** CAUTION: Survey marked UNFISHABLE for Site ID: {0}'.format(site_id), 'red'))
 
-        creator = survey_list_current[survey_list_header.index('Creator')]
+        creator = survey_list_current[survey_list_header.index('created_user')]
 
         # Loop through locations survey sheet - filtering for each survey.
         for lcs in filter(lambda x: x[loc_list_header.index('parentrowid')] == survey_list_current[
@@ -175,12 +175,12 @@ else:
                 for same_location in filter(lambda x: x[loc_list_header.index('parentrowid')] == loc_list_current[
                     loc_list_header.index('parentrowid')], loc_list):
 
-                    if same_location[loc_list_header.index('point_location')] == 'site_start':
+                    if same_location[loc_list_header.index('site_location')] == 'site_start':
                         pair = True
                         x_start = same_location[loc_list_header.index('x_coordinate')]
                         y_start = same_location[loc_list_header.index('y_coordinate')]
 
-                    elif same_location[loc_list_header.index('point_location')] == 'site_finish':
+                    elif same_location[loc_list_header.index('site_location')] == 'site_finish':
                         pair = True
                         x_finish = same_location[loc_list_header.index('x_coordinate')]
                         y_finish = same_location[loc_list_header.index('y_coordinate')]
@@ -201,7 +201,7 @@ else:
                     for shot_list_current in sts:
                         shot_list_current = list(shot_list_current)
 
-                        section_index = shot_list_header.index('section_number')
+                        section_index = shot_list_header.index('shot_number')
                         if shot_list_current[section_index] is None and len(sts) == 1:
                             shot_list_current[section_index] = 1
 
@@ -242,8 +242,8 @@ else:
                                                                  creator,
                                                                  ID_Indices))
 
-                                if obs_list_current[obs_list_header.index('section_collected')] is None:
-                                    obs_list_current[obs_list_header.index('section_collected')] = 0
+                                if obs_list_current[obs_list_header.index('shot_collected')] is None:
+                                    obs_list_current[obs_list_header.index('shot_collected')] = 0
 
                                 # Determine species from columns custom, new and obs.
                                 if obs_list_current[s_custom] is not None or obs_list_current[s_new] is not None or \
@@ -258,11 +258,11 @@ else:
                                     # Enter correct species
                                     obs_list_current[s_obs] = species
 
-                                    collected = obs_list_current[obs_list_header.index('section_collected')]
+                                    collected = obs_list_current[obs_list_header.index('shot_collected')]
                                     observed = obs_list_current[obs_list_header.index('observed')]
 
                                     if collected is None:
-                                        obs_list_current[obs_list_header.index('section_collected')] = 0
+                                        obs_list_current[obs_list_header.index('shot_collected')] = 0
                                     if observed is None:
                                         obs_list_current[obs_list_header.index('observed')] = 0
 
@@ -301,7 +301,7 @@ else:
 
                                 print('Notice: Created NO FISH shot for site {0} : shot No {1} '.format(survey_list_current[survey_list_header.index('uniquerowid')], shot_list_current[section_index]))
                                 obs_list_current = [None] * len(obs_list_header)
-                                obs_list_current[obs_list_header.index('section_collected')] = 0
+                                obs_list_current[obs_list_header.index('shot_collected')] = 0
                                 obs_list_current[obs_list_header.index('species_obs')] = 'No Fish'
                                 sample_list_current[sample_list_header.index('species_samp')] = 'No Fish'
                                 # Build object for output
@@ -329,12 +329,12 @@ else:
 ##                    if survey_list_current[survey_list_header.index('section_condition')] == 'FISHABLE':
 
                     shot_list_current = [None] * len(shot_list_header)
-                    shot_list_current[shot_list_header.index('section_number')] = 1
+                    shot_list_current[shot_list_header.index('shot_number')] = 1
                     shot_list_current[shot_list_header.index('parentrowid')] = site_id
 
                     # Create filler for observations:
                     obs_list_current = [None] * len(obs_list_header)
-                    obs_list_current[obs_list_header.index('section_collected')] = 0
+                    obs_list_current[obs_list_header.index('shot_collected')] = 0
 
                     smpls = list(filter(lambda x: x[sample_list_header.index('parentrowid')] == site_id, sample_list))
 
@@ -346,9 +346,9 @@ else:
                     else:
                         print('Notice: Created NO FISH shot (1) for site {0} '.format(survey_list_current[survey_list_header.index('uniquerowid')]))
                         shot_list_current = [None] * len(shot_list_header)
-                        shot_list_current[shot_list_header.index('section_number')] = 1
+                        shot_list_current[shot_list_header.index('shot_number')] = 1
                         shot_list_current[shot_list_header.index('parentrowid')] = site_id
-                        obs_list_current[obs_list_header.index('section_collected')] = 0
+                        obs_list_current[obs_list_header.index('shot_collected')] = 0
                         obs_list_current[obs_list_header.index('species_obs')] = 'No Fish'
                         sample_list_current[sample_list_header.index('species_samp')] = 'No Fish'
                         # Build object for output
@@ -374,8 +374,8 @@ else:
                 try:
                     tally_header
                 except:
-                    tally_header = ['Site_ID', 'Section_Number', 'Species', 'Collected', 'Observed',
-                                    'Collected_Tally', 'shot_id', 'obs_id', 'Creator']
+                    tally_header = ['Site_ID', 'shot_number', 'Species', 'Collected', 'Observed',
+                                    'Collected_Tally', 'shot_id', 'obs_id', 'created_user']
 
 ##            else:
 ##                print('*** Site End Location reorded for {0}'.format(site_id))
@@ -388,21 +388,21 @@ else:
     ## ----------------------------------------------------------------------------------------------------------------------
     print('Processing Sampled Data...')
 
-    sample_checklist = ['section_number_samp',
+    sample_checklist = ['shot_no_sample',
                         'fork_length',
                         'total_length',
                         'weight',
                         'collected',
                         'recapture',
-                        'external_tag_no',
+                        'dart_tbar',
                         'pit',
-                        'genetics_label',
-                        'otoliths_label',
-                        'fauna_notes']
+                        'genetics',
+                        'otoliths',
+                        'fish_notes']
 
     for smp in sample_list:
         sample_list_current = list(smp)
-        creator = sample_list_current[sample_list_header.index('Creator')]
+        creator = sample_list_current[sample_list_header.index('created_user')]
         s_custom = sample_list_current[sample_list_header.index('species_samp_custom')]
         s_samp = sample_list_current[sample_list_header.index('species_samp')]
 
@@ -423,14 +423,14 @@ else:
                 site_id = sample_list_current[sample_list_header.index('parentrowid')]
 
                 # If a shot is already asigned otherwise set to 0 to get a random shot
-                section_number = int(0 if sample_list_current[sample_list_header.index('section_number_samp')] is None else sample_list_current[sample_list_header.index('section_number_samp')])
+                section_number = int(0 if sample_list_current[sample_list_header.index('shot_no_sample')] is None else sample_list_current[sample_list_header.index('shot_no_sample')])
 
                 if section_number == 0:
                     rand_pick = func.get_random_shot(site_id, species, raw_data, obs_list_header, shot_list_header)
                 else:
 ##                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('ParentGlobalID')] == site_id and x.shots[shot_list_header.index('section_number')] == section_number
 ##                        and x.observations[obs_list_header.index('species_obs')] != 'No Fish',  raw_data))
-                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('parentrowid')] == site_id and x.shots[shot_list_header.index('section_number')] == section_number,  raw_data))
+                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('parentrowid')] == site_id and x.shots[shot_list_header.index('shot_number')] == section_number,  raw_data))
 
                     if len(shotlist) > 0:
                         rand_pick = shotlist[0]
@@ -441,7 +441,7 @@ else:
                 # If a shot is found:
                 if rand_pick != False:
                     # Fix collected number:
-                    section_num = (int(rand_pick.shots[shot_list_header.index('section_number')])
+                    section_num = (int(rand_pick.shots[shot_list_header.index('shot_number')])
                         if section_number == 0 else section_number)
                     if sample_list_current[sample_list_header.index('collected')] is None or sample_list_current[
                         sample_list_header.index('collected')] == 0:
@@ -456,9 +456,9 @@ else:
                     obs_list_current = [None] * len(obs_list_header)
                     if sample_list_current[sample_list_header.index('collected')] is None or sample_list_current[
                         sample_list_header.index('collected')] == 0:
-                        obs_list_current[obs_list_header.index('section_collected')] = 1
+                        obs_list_current[obs_list_header.index('shot_collected')] = 1
                     else:
-                        obs_list_current[obs_list_header.index('section_collected')] = sample_list_current[
+                        obs_list_current[obs_list_header.index('shot_collected')] = sample_list_current[
                             sample_list_header.index('collected')]
                     if obs_list_current[obs_list_header.index('observed')] is None:
                         obs_list_current[obs_list_header.index('observed')] = 0
@@ -487,28 +487,28 @@ else:
                 else:
 
                     # if a sample has been assigned to a shot which isn't recorded in the observed then add the species
-                    if sample_list_current[sample_list_header.index('section_number_samp')] is None:
+                    if sample_list_current[sample_list_header.index('shot_no_sample')] is None:
                         section_number_samp = 0
                     else:
-                        section_number_samp = int(sample_list_current[sample_list_header.index('section_number_samp')])
+                        section_number_samp = int(sample_list_current[sample_list_header.index('shot_no_sample')])
 
 
                     if section_number_samp not in [0, None]:
 
-                        section_num = int(sample_list_current[sample_list_header.index('section_number_samp')])
+                        section_num = int(sample_list_current[sample_list_header.index('shot_no_sample')])
                         print('Notice: Adding {0} to shot {1} in site ID: {2}'.format(species, section_num, site_id))
 
                         if sample_list_current[sample_list_header.index('collected')] not in [0, None]:
                             sample_list_current[sample_list_header.index('collected')] = 1
 
-                        shotlist = list(filter(lambda x: x.shots[shot_list_header.index('parentrowid')] == site_id and x.shots[shot_list_header.index('section_number')] == section_num,  raw_data))
+                        shotlist = list(filter(lambda x: x.shots[shot_list_header.index('parentrowid')] == site_id and x.shots[shot_list_header.index('shot_number')] == section_num,  raw_data))
 
                         if len(shotlist) == 0:
                             # print('*** ERROR: Sample not added. Missing shot listed in sample: {0}'.format(sample_list_current[sample_list_header.index('GlobalID')]))
                             print(func.colour_terminal_output('*** ERROR: Sample not added. Missing shot listed in sample: {0}\nPossible section number format error or missing location tab info'.format(sample_list_current[sample_list_header.index('globalid')]), 'red'))
                         else:
                             obs_list_current = [None] * len(obs_list_header)
-                            obs_list_current[obs_list_header.index('section_collected')] = 1
+                            obs_list_current[obs_list_header.index('shot_collected')] = 1
 
                             ID_Indices = [survey_list_header.index('uniquerowid'),
                                       loc_list_header.index('globalid'),
@@ -559,7 +559,7 @@ else:
     print('Collating data...')
     raw_data_header = survey_list_header_edit + loc_list_header_edit + shot_list_header_edit + obs_list_header_edit + sample_list_header_edit
     # Append GlobalID List and creator:
-    raw_data_header += ['Site_uniquerowid', 'Loc_GlobalID', 'Shot_uniquerowid', 'Obs_GlobalID', 'Sample_GlobalID', 'Creator']
+    raw_data_header += ['Site_uniquerowid', 'Loc_GlobalID', 'Shot_uniquerowid', 'Obs_GlobalID', 'Sample_GlobalID', 'created_user']
 
     for i in raw_data:
         i.collate(raw_data_header)
@@ -575,7 +575,7 @@ else:
 
     #remove records that have no observed or collected data (usually inserted for tally keeping purposes)
     for i in raw_data[:]:
-        if (i.collation[raw_data_header.index('species')] is None or i.collation[raw_data_header.index('species')].lower() != 'no fish') and i.collation[raw_data_header.index('section_collected')] <= 0 and i.collation[raw_data_header.index('observed')] == 0 and i.collation[raw_data_header.index('collected')] is None:
+        if (i.collation[raw_data_header.index('species')] is None or i.collation[raw_data_header.index('species')].lower() != 'no fish') and i.collation[raw_data_header.index('shot_collected')] <= 0 and i.collation[raw_data_header.index('observed')] == 0 and i.collation[raw_data_header.index('collected')] is None:
             ob_id = i.collation[raw_data_header.index('Obs_GlobalID')]
             raw_data.remove(i)
             print('Notice: REMOVED Obs Record (Negative collected, Zero Observed): {0}'.format(ob_id))
@@ -606,9 +606,9 @@ else:
             wer_species = re.sub(r'\(.*?\) *', '', wer_species)
             wer_species = wer_species.strip()
             result.collation[raw_data_header.index('species')] = wer_species
-        sdate =  result.collation[raw_data_header.index('survey_date')]
+        sdate =  result.collation[raw_data_header.index('sdate')]
         sdate = sdate.strftime('%d/%m/%Y')
-        result.collation[raw_data_header.index('survey_date')] = sdate
+        result.collation[raw_data_header.index('sdate')] = sdate
         func.write_row(ws_write, row_count, 1, tuple(result.collation))
 
     # Tally Data:
