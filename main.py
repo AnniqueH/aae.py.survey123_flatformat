@@ -431,6 +431,10 @@ else:
 ##                    shotlist = list(filter(lambda x: x.shots[shot_list_header.index('ParentGlobalID')] == site_id and x.shots[shot_list_header.index('section_number')] == section_number
 ##                        and x.observations[obs_list_header.index('species_obs')] != 'No Fish',  raw_data))
                     shotlist = list(filter(lambda x: x.shots[shot_list_header.index('parentrowid')] == site_id and x.shots[shot_list_header.index('shot_number')] == section_number,  raw_data))
+                    if sample_list_current[sample_list_header.index('fish_notes')] is None:
+                        sample_list_current[sample_list_header.index('fish_notes')] = '[defined shot]'
+                    else:
+                        sample_list_current[sample_list_header.index('fish_notes')] = '[defined shot];' + sample_list_current[sample_list_header.index('fish_notes')]
 
                     if len(shotlist) > 0:
                         rand_pick = shotlist[0]
